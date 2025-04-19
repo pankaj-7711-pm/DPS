@@ -4,6 +4,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js"
 import adminRoutes from "./routes/adminRoutes.js"
 import userRoutes from "./routes/userRoutes.js"
+import cors from "cors";
 import path from "path";
 dotenv.config();
 
@@ -11,6 +12,7 @@ connectDB();
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 //routes

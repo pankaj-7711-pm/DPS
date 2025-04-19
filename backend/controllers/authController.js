@@ -41,7 +41,7 @@ export const registerController = async (req, res) => {
     await user.save();
     res.status(201).send({
       success: true,
-      message: "User Registered Successfully",
+      message: "User Registered Successfully. Now wait for sometime and try logging in as it will be reviewed by admin.",
       user,
     });
   } catch (error) {
