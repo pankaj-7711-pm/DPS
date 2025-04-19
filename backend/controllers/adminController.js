@@ -1,4 +1,5 @@
 import userModel from "../models/userModel.js";
+import logsModel from "../models/logsModel.js";
 
 export const changeStatusController = async (req, res) => {
   try {
@@ -90,6 +91,60 @@ export const getSingleUserController = async (req, res) => {
     res.status(400).send({
       success: false,
       message: "Error while fetching user",
+      error,
+    });
+  }
+};
+
+export const getAllLogsController = async (req, res) => {
+  try {
+    const logs = await logsModel
+      .find({})
+      .sort({ createdAt: -1 }) // Newest first
+      .populate("user_id") // Populate user details
+      .populate("document_id"); // Populate document details
+
+    res.status(200).send({
+      success: true,
+      message: "All logs fetched successfully",
+      logs,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: "Error while fetching logs",
+      error,
+    });
+  }
+};
+
+export const getUserLogController = async (req, res) => {
+  try {
+    const { user_id } = req.body;
+
+    if (!user_id) {
+      return res.status(400).send({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    const logs = await logsModel
+      .find({ user_id })
+      .sort({ createdAt: -1 }) // Newest first
+      .populate("document_id"); // Populate document details
+
+    res.status(200).send({
+      success: true,
+      message: "User logs fetched successfully",
+      logs,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: "Error while fetching user logs",
       error,
     });
   }

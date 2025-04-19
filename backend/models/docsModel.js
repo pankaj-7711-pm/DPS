@@ -1,23 +1,22 @@
 import mongoose from "mongoose";
 
-const logsSchema = mongoose.Schema(
+const docsSchema = mongoose.Schema(
   {
     user_id: {
       type: mongoose.ObjectId,
       ref: "users",
       required: true,
     },
-    action: {
+    file_name: {
       type: String,
-      default: "uploaded_document",
+      required: true,
     },
-    document_id: {
-      type: mongoose.ObjectId,
-      ref: "docs",
+    file_path: {
+      type: String,
       required: true,
     },
   },
   { timestamps: true }
 );
 
-export default mongoose.model("logs", logsSchema);
+export default mongoose.model("docs", docsSchema);

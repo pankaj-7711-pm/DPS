@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js"
 import adminRoutes from "./routes/adminRoutes.js"
+import userRoutes from "./routes/userRoutes.js"
 import path from "path";
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 //routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/adminctrl", adminRoutes);
+app.use("/api/v1/userctrl", userRoutes);
 
 // app.get("/", (req, res) => {
 //   res.send("<h1>Welcome to Document processing app</h1>");

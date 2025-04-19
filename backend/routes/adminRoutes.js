@@ -4,8 +4,10 @@ import {
   changeStatusController,
   getAllActiveUsersController,
   getAllInactiveUsersController,
+  getAllLogsController,
   getAllUsersController,
   getSingleUserController,
+  getUserLogController,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -34,5 +36,11 @@ router.get(
 
 //fetch a single user
 router.get("/getOneUsers", requireSignIn, isAdmin, getSingleUserController);
+
+//fetch all logs
+router.get("/get-all-logs", requireSignIn, isAdmin, getAllLogsController);
+
+//fetch logs of particular user
+router.get("/get-user-logs", requireSignIn, isAdmin, getUserLogController);
 
 export default router;
