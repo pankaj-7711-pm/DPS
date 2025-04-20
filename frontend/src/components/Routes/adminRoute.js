@@ -3,13 +3,16 @@ import axios from "axios";
 import { Outlet } from "react-router-dom";
 import Spinner from "../../pages/Spinner";
 import { ConState } from "../../context/ConProvider";
-export default function adminRoute() {
+
+export default function AdminRoute() {
   const [ok, setOk] = useState(false);
   const { user, setUser } = ConState();
-
+ 
   useEffect(() => {
     const authCheck = async () => {
-      const res = await axios.get("/api/v1/auth/admin-auth");
+      const res = await axios.get(
+        "http://localhost:4000/api/v1/auth/admin-auth"
+      );
       if (res.data.ok) {
         setOk(true);
       } else {

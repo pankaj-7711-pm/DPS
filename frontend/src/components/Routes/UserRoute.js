@@ -12,7 +12,7 @@ export default function UserRoute() {
   useEffect(() => {
     const authCheck = async () => {
       const res = await axios.get(
-        "/api/v1/auth/user-auth"
+        "http://localhost:4000/api/v1/auth/user-auth"
       );
       if (res?.data?.ok) {
         setOk(true);

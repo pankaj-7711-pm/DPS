@@ -38,7 +38,8 @@ const Login = () => {
           token: res.data.token,
         });
         localStorage.setItem("auth", JSON.stringify(res.data));
-        navigate("/");
+        if(res.data.user.role===1)navigate("/dashboard/admin");
+        else navigate("/dashboard/user");
       } else {
         toast({
           title: res.data.message,

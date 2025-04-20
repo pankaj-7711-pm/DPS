@@ -11,7 +11,7 @@ router.post("/upload", requireSignIn, uploadController);
 router.get("/get-doc", requireSignIn, getAllDocsController);
 
 //view single document
-router.get("/get-single-doc", requireSignIn, getOneDocController);
+router.post("/get-single-doc", requireSignIn, getOneDocController);
 
 
 

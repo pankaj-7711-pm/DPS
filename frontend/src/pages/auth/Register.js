@@ -94,7 +94,7 @@ const Register = () => {
           <div style={{ fontSize: "13px" }}>
             Have an account?{" "}
             <span
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/")}
               style={{
                 color: "blue",
                 textDecoration: "underline",

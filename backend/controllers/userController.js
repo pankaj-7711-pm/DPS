@@ -62,7 +62,7 @@ export const getAllDocsController = async (req, res) => {
 export const getOneDocController = async (req, res) => {
   try {
     const { docid } = req.body;
-    const document = await docsModel.find({ _id: docid });
+    const document = await docsModel.findOne({ _id: docid });
     res.status(200).send({
       document,
       success: true,

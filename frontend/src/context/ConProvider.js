@@ -14,14 +14,14 @@ const ConProvider = ({ children }) => {
   axios.defaults.headers.common["Authorization"] = user?.token;
 
   useEffect(() => {
-    const data = localStorage.getItem("userInform");
+    const data = localStorage.getItem("auth");
     if (data) {
       const parseData = JSON.parse(data);
       const decodedToken = jwtDecode(parseData.token);
 
       const currentTime = Date.now() / 1000; // in seconds
       if (decodedToken.exp < currentTime) {
-        localStorage.removeItem("userInform");
+        localStorage.removeItem("auth");
       } else {
         setUser({
           ...user,
