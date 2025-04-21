@@ -4,14 +4,20 @@ import logsModel from "../models/logsModel.js";
 export const changeStatusController = async (req, res) => {
   try {
     const { email, statusValue } = req.body;
-    const updatedUser = await userModel.findByIdAndUpdate(
-      email,
-      {
-        status: statusValue,
-      },
+
+    const updatedUser = await userModel.findOneAndUpdate(
+      { email },
+      { status: statusValue },
       { new: true }
     );
-    await updatedUser.save();
+
+    if (!updatedUser) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+
     res.status(200).send({
       success: true,
       message:
@@ -27,6 +33,7 @@ export const changeStatusController = async (req, res) => {
     });
   }
 };
+
 
 export const getAllUsersController = async (req, res) => {
   try {
@@ -81,7 +88,17 @@ export const getAllInactiveUsersController = async (req, res) => {
 
 export const getSingleUserController = async (req, res) => {
   try {
-    const user = await userModel.find({ email: req.body });
+    const { email } = req.body;
+
+    const user = await userModel.findOne({ email });
+
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+
     res.status(200).send({
       user,
       success: true,

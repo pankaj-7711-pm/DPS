@@ -35,12 +35,12 @@ router.get(
 );
 
 //fetch a single user
-router.get("/getOneUsers", requireSignIn, isAdmin, getSingleUserController);
+router.post("/getOneUsers", requireSignIn, isAdmin, getSingleUserController);
 
 //fetch all logs
 router.get("/get-all-logs", requireSignIn, isAdmin, getAllLogsController);
 
 //fetch logs of particular user
-router.get("/get-user-logs", requireSignIn, isAdmin, getUserLogController);
+router.post("/get-user-logs", requireSignIn, isAdmin, getUserLogController);
 
 export default router;
