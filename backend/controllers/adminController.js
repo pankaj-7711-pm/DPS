@@ -1,5 +1,6 @@
 import userModel from "../models/userModel.js";
 import logsModel from "../models/logsModel.js";
+import docsModel from "../models/docsModel.js";
 
 export const changeStatusController = async (req, res) => {
   try {
@@ -34,7 +35,6 @@ export const changeStatusController = async (req, res) => {
   }
 };
 
-
 export const getAllUsersController = async (req, res) => {
   try {
     const users = await userModel.find({});
@@ -54,7 +54,7 @@ export const getAllUsersController = async (req, res) => {
 
 export const getAllActiveUsersController = async (req, res) => {
   try {
-    const users = await userModel.find({status:1});
+    const users = await userModel.find({ status: 1 });
     res.status(200).send({
       users,
       success: true,
@@ -90,7 +90,9 @@ export const getSingleUserController = async (req, res) => {
   try {
     const { email } = req.body;
 
-    const user = await userModel.findOne({ email });
+    // const user = await userModel.findOne({ email });
+
+    const user = await userModel.findOne({ email: { $regex: email } });
 
     if (!user) {
       return res.status(404).send({
@@ -162,6 +164,55 @@ export const getUserLogController = async (req, res) => {
     res.status(500).send({
       success: false,
       message: "Error while fetching user logs",
+      error,
+    });
+  }
+};
+
+export const getFilterDocsController = async (req, res) => {
+  try {
+    const { department, branch } = req.body;
+
+    if (!department || !branch) {
+      return res.status(400).send({
+        success: false,
+        message: "Department and Branch are required.",
+      });
+    }
+
+    const documents = await docsModel
+      .find({ branch, department })
+      .sort({ createdAt: -1 });
+
+    res.status(200).send({
+      success: true,
+      message: "Filtered documents fetched successfully",
+      documents,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: "Error while fetching filtered documents",
+      error,
+    });
+  }
+};
+
+export const getAllDocsController = async (req, res) => {
+  try {
+    const documents = await docsModel.find({}).sort({ createdAt: -1 }); // Sorted by newest first
+
+    res.status(200).send({
+      success: true,
+      message: "All documents fetched successfully",
+      documents,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: "Error while fetching all documents",
       error,
     });
   }

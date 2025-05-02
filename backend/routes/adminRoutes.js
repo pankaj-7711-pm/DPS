@@ -3,9 +3,11 @@ import { isAdmin, requireSignIn } from "../helpers/authHelpers.js";
 import {
   changeStatusController,
   getAllActiveUsersController,
+  getAllDocsController,
   getAllInactiveUsersController,
   getAllLogsController,
   getAllUsersController,
+  getFilterDocsController,
   getSingleUserController,
   getUserLogController,
 } from "../controllers/adminController.js";
@@ -40,7 +42,13 @@ router.post("/getOneUsers", requireSignIn, isAdmin, getSingleUserController);
 //fetch all logs
 router.get("/get-all-logs", requireSignIn, isAdmin, getAllLogsController);
 
+//fetch all docs
+router.get("/get-all-documents", requireSignIn, isAdmin, getAllDocsController);
+
 //fetch logs of particular user
 router.post("/get-user-logs", requireSignIn, isAdmin, getUserLogController);
+
+//apply filter
+router.post("/filter-documents", requireSignIn, isAdmin, getFilterDocsController);
 
 export default router;

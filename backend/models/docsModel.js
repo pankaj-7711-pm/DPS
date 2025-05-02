@@ -15,8 +15,16 @@ const docsSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    branch: {
+      type: String,
+      required: true,
+    },
+    department: {
+      type: String,
+      required: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true } 
 );
 
 export default mongoose.model("docs", docsSchema);
