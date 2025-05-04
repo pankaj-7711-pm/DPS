@@ -3,6 +3,7 @@ import axios from "axios";
 import { ConState } from "../../context/ConProvider";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@chakra-ui/react";
+import { Avatar } from "@chakra-ui/react";
 
 const branchDeptOptions = {
   "General Administration": [
@@ -15,7 +16,7 @@ const branchDeptOptions = {
     "Legal",
     "Protocol",
   ],
-  Revenue: [
+  "Revenue": [
     "Land Records",
     "City Survey",
     "District Inspector Land Records (DILR)",
@@ -27,7 +28,7 @@ const branchDeptOptions = {
     "Land Acquisition",
   ],
   "Disaster Management": ["Disaster Response", "Relief Coordination"],
-  Election: [
+  "Election": [
     "District Election Office",
     "Deputy District Election Officer",
     "Mamlatdar Election",
@@ -42,7 +43,7 @@ const branchDeptOptions = {
     "Development Authorities (e.g., DUDA, AVKUDA)",
   ],
   "Geology & Mining": ["Geology & Mining Branch"],
-  Education: ["Primary Education", "Secondary Education", "Higher Education"],
+  "Education": ["Primary Education", "Secondary Education", "Higher Education"],
   "Health & Family Welfare": ["Health Department", "Family Welfare Schemes"],
   "Social Welfare": [
     "Social Justice & Empowerment",
@@ -76,6 +77,7 @@ const UserDashboard = () => {
   const [pdfUrl, setPdfUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [documents, setDocuments] = useState([]);
+  const [ln, setLn] = useState(0);
 
   const [branch, setBranch] = useState("");
   const [department, setDepartment] = useState("");
@@ -176,7 +178,10 @@ const UserDashboard = () => {
       const res = await axios.get(
         "http://localhost:4000/api/v1/userctrl/get-doc"
       );
-      if (res.data.success) setDocuments(res.data.documents || []);
+      if (res.data.success) {
+        setDocuments(res.data.documents || []);
+        setLn(res.data.documents.length)
+      }
     } catch (error) {
       console.error("Error fetching documents:", error);
     }
@@ -235,9 +240,31 @@ const UserDashboard = () => {
   return (
     <div>
       <nav className="navbar navbar-light bg-light justify-content-between px-4">
-        <div>
-          Hi <span style={{ color: "red" }}>{user.user.name}</span>, Welcome to
-          Your Dashboard
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Avatar style={{ marginRight: "5px" }} name={user.user.name} />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-start",
+              // alignItems: "center",
+              flexDirection:"column"
+            }}
+          >
+            <div>
+              Hi{" "}
+              <span style={{ color: "red", marginLeft: "3px" }}>
+                {user.user.name}
+              </span>
+              , Welcome to Your Dashboard
+            </div>
+            <p style={{margin:"0"}}>{user.user.email}</p>
+          </div>
         </div>
         <button className="btn btn-outline-danger" onClick={handleLogout}>
           Logout
@@ -245,9 +272,26 @@ const UserDashboard = () => {
       </nav>
 
       <div className="container mt-5 mb-5">
-        <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", padding:"0"}}>
-          <div>
-            <h3 className="mb-4">Upload your document</h3>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            padding: "0",
+          }}
+        >
+          <div
+            className="aaa"
+            style={{
+              padding: "2rem 2rem 1rem 2rem",
+              borderRadius: "12px",
+            }}
+          >
+            <h3 className="mb-4">
+              <span style={{ color: "blue" }}>Upload</span> your{" "}
+              <span style={{ color: "blue" }}>Document</span>
+            </h3>
 
             <div className="mb-3">
               <label className="form-label">Select Branch</label>
@@ -296,12 +340,6 @@ const UserDashboard = () => {
               />
             </div>
 
-            {selectedFile && (
-              <p className="text-success">
-                <strong>Selected File:</strong> {selectedFile.name}
-              </p>
-            )}
-
             <button
               className="btn btn-primary mb-4"
               onClick={handleSubmit}
@@ -310,8 +348,20 @@ const UserDashboard = () => {
               {isLoading ? "Uploading..." : "Submit"}
             </button>
           </div>
-          <div>
-            <h1>You have uploaded { documents.length} documents.</h1>
+          <div style={{ width: "60%" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                flexWrap: "wrap",
+                flexDirection: "column",
+              }}
+            >
+              <h1>You have uploaded</h1>
+              <h1 style={{ color: "green" }}>{ln}</h1>
+              <h1>documents.</h1>
+            </div>
           </div>
         </div>
         <hr />
@@ -365,6 +415,10 @@ const UserDashboard = () => {
           <p>No documents uploaded yet.</p>
         ) : (
           <ul className="list-group">
+            <div style={{ margin: "0px 0 12px 0", textAlign: "center" }}>
+              <span style={{ color: "blue" }}>{documents.length}</span>{" "}
+              Documents
+            </div>
             {documents.map((doc) => (
               <li
                 key={doc._id}

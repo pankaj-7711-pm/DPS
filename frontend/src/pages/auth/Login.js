@@ -65,7 +65,7 @@ const Login = () => {
     <div>
       <div
         className="form-container"
-        style={{ height: "100vh", backgroundColor: "black" }}
+        style={{ height: "100vh" }}
       >
         <form
           onSubmit={handleSubmit}
@@ -73,6 +73,8 @@ const Login = () => {
             borderRadius: "10px",
             display: "flex",
             flexDirection: "column",
+            border: "1px solid black",
+            width:"18rem"
           }}
         >
           <h4 className="title">Login</h4>
@@ -122,7 +124,7 @@ const Login = () => {
               variant="contained"
               type="submit"
             >
-              Login
+              Sign In
             </Button>
           </div>
         </form>

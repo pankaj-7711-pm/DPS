@@ -48,7 +48,7 @@ const Register = () => {
     <div>
       <div
         className="form-container p-5"
-        style={{ height: "100vh", backgroundColor: "black" }}
+        style={{ height: "100vh" }}
       >
         <form
           onSubmit={handleSubmit}
@@ -56,9 +56,12 @@ const Register = () => {
             borderRadius: "10px",
             display: "flex",
             flexDirection: "column",
+            border: "1px solid black",
+            width: "20rem",
+            padding:"2rem 2rem"
           }}
         >
-          <h4 className="title">Register</h4>
+          <h4 className="title">Register to continue!</h4>
           <TextField
             className="mb-3"
             id="outlined-basic"
@@ -110,7 +113,7 @@ const Register = () => {
             variant="contained"
             type="submit"
           >
-            Register
+            Sign Up
           </Button>
         </form>
       </div>

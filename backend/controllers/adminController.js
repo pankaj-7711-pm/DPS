@@ -92,7 +92,7 @@ export const getSingleUserController = async (req, res) => {
 
     // const user = await userModel.findOne({ email });
 
-    const user = await userModel.findOne({ email: { $regex: email } });
+    const user = await userModel.find({ email: { $regex: email } });
 
     if (!user) {
       return res.status(404).send({

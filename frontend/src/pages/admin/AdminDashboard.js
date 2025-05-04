@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ConState } from "../../context/ConProvider";
+import { Avatar } from "@chakra-ui/react";
 import {
   useToast,
   Modal,
@@ -111,6 +112,7 @@ const AdminDashboard = () => {
   const [branch, setBranch] = useState("");
   const [department, setDepartment] = useState("");
   const [date, setDate] = useState("");
+  const [countData, setCountData] = useState("Total Users");
 
   const { user, setUser } = ConState();
   const navigate = useNavigate();
@@ -119,13 +121,31 @@ const AdminDashboard = () => {
   const fetchUsers = async () => {
     let url = "http://localhost:4000/api/v1/adminctrl/getAllUsers";
     if (filter === "active")
+    {
       url = "http://localhost:4000/api/v1/adminctrl/getAllActiveUsers";
+      // setCountData("Total Active Users");
+    }
+      
     if (filter === "inactive")
+    {
       url = "http://localhost:4000/api/v1/adminctrl/getAllInactiveUsers";
+      // setCountData("Total Inactive Users");
+    }
+      
 
     try {
       const response = await axios.get(url);
       setUsers(response.data.users || []);
+      if (filter === "all") {
+        setCountData("Total Users");
+      }
+      if (filter === "active") {
+        setCountData("Total Active Users");
+      }
+
+      if (filter === "inactive") {
+        setCountData("Total Inactive Users");
+      }
     } catch (err) {
       console.error(err);
       setUsers([]);
@@ -205,7 +225,8 @@ const AdminDashboard = () => {
         }
       );
       if (response.data.success) {
-        setUsers([response.data.user]);
+        setUsers(response.data.user);
+        setCountData("Total Searched Users")
       } else {
         setUsers([]);
       }
@@ -258,7 +279,29 @@ const AdminDashboard = () => {
   return (
     <>
       <nav className="navbar navbar-light bg-light justify-content-space-between px-4">
-        <div>Welcome to the <span style={{color:"red"}}>Admin</span> Dashboard</div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Avatar style={{ marginRight: "5px" }} name={user.user.name} />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-start",
+              // alignItems: "center",
+              flexDirection: "column",
+            }}
+          >
+            <div>
+              Hi <span style={{ color: "red", marginLeft: "3px" }}>Admin</span>,
+              Welcome to Your Dashboard
+            </div>
+            <p style={{ margin: "0" }}>{user.user.email}</p>
+          </div>
+        </div>
         <button className="btn btn-outline-danger" onClick={handleLogout}>
           Logout
         </button>
@@ -287,7 +330,7 @@ const AdminDashboard = () => {
               Inactive Users
             </button>
           </div>
-          <div className="fs-5">Total Users: {users.length}</div>
+          <div className="fs-5">{countData}: {users.length}</div>
         </div>
         <div className="mb-4 d-flex">
           <input
@@ -364,7 +407,6 @@ const AdminDashboard = () => {
                 ))}
               </select>
             </div>
-            
           </div>
           <div className="mt-3">
             <button
@@ -388,7 +430,9 @@ const AdminDashboard = () => {
         </div>
 
         <div className="mt-5 mb-5">
-          <h4>All Documents</h4>
+          <h4 style={{marginBottom:"2rem", textAlign:"center"}}>
+            <span style={{color:"blue"}}>{documents.length}</span> Documents
+          </h4>
           <div className="row g-4">
             {documents.map((doc) => (
               <div key={doc._id} className="col-md-4">
