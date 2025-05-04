@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ConState } from "../../context/ConProvider";
-import { Avatar } from "@chakra-ui/react";
+import { Avatar, Select } from "@chakra-ui/react";
 import {
   useToast,
   Modal,
@@ -107,6 +107,9 @@ const AdminDashboard = () => {
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [logLoading, setLogLoading] = useState(false);
   const [selectedUserEmail, setSelectedUserEmail] = useState("");
+  const [selectedBranch, setSelectedBranch] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [logUser, setLogUser] = useState();
 
   const [documents, setDocuments] = useState([]);
   const [branch, setBranch] = useState("");
@@ -150,6 +153,34 @@ const AdminDashboard = () => {
       console.error(err);
       setUsers([]);
     }
+  };
+
+  const handleApplyFilter = async () => {
+    setLogLoading(true);
+    if (!selectedBranch || !selectedDepartment) return;
+
+    try {
+      const res = await axios.post(
+        "http://localhost:4000/api/v1/adminctrl/get-filter-logs",
+        {
+          email: selectedUserEmail,
+          branch: selectedBranch,
+          department: selectedDepartment,
+        }
+      );
+
+      setLogs(res.data.logs || []);
+    } catch (err) {
+      console.error("Error filtering logs:", err);
+    } finally {
+      setLogLoading(false);
+    }
+  };
+
+  const handleClearFilter = () => {
+    setSelectedBranch("");
+    setSelectedDepartment("");
+    handleViewLogs(logUser,selectedUserEmail);
   };
 
   const fetchDocuments = async () => {
@@ -239,6 +270,9 @@ const AdminDashboard = () => {
   const handleViewLogs = async (userId, email) => {
     setSelectedUserEmail(email);
     setLogLoading(true);
+    setLogUser(userId);
+    setSelectedBranch("");
+    setSelectedDepartment("");
     setIsLogModalOpen(true);
 
     try {
@@ -330,7 +364,9 @@ const AdminDashboard = () => {
               Inactive Users
             </button>
           </div>
-          <div className="fs-5">{countData}: {users.length}</div>
+          <div className="fs-5">
+            {countData}: {users.length}
+          </div>
         </div>
         <div className="mb-4 d-flex">
           <input
@@ -430,8 +466,8 @@ const AdminDashboard = () => {
         </div>
 
         <div className="mt-5 mb-5">
-          <h4 style={{marginBottom:"2rem", textAlign:"center"}}>
-            <span style={{color:"blue"}}>{documents.length}</span> Documents
+          <h4 style={{ marginBottom: "2rem", textAlign: "center" }}>
+            <span style={{ color: "blue" }}>{documents.length}</span> Documents
           </h4>
           <div className="row g-4">
             {documents.map((doc) => (
@@ -473,7 +509,55 @@ const AdminDashboard = () => {
           <ModalContent>
             <ModalHeader>Logs for {selectedUserEmail}</ModalHeader>
             <ModalCloseButton />
-            <ModalBody>
+            <ModalBody style={{ maxHeight: "70vh", overflowY: "auto" }}>
+              <div className="mb-4">
+                <div className="mb-2">
+                  <Select
+                    placeholder="Select Branch"
+                    value={selectedBranch}
+                    onChange={(e) => {
+                      setSelectedBranch(e.target.value);
+                      setSelectedDepartment("");
+                    }}
+                  >
+                    {branchOptions.map((branch) => (
+                      <option key={branch} value={branch}>
+                        {branch}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="mb-2">
+                  <Select
+                    placeholder="Select Department"
+                    value={selectedDepartment}
+                    onChange={(e) => setSelectedDepartment(e.target.value)}
+                    isDisabled={!selectedBranch}
+                  >
+                    {(departmentMap[selectedBranch] || []).map((dept) => (
+                      <option key={dept} value={dept}>
+                        {dept}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleApplyFilter}
+                    style={{ marginRight: "10px" }}
+                  >
+                    Apply Filter
+                  </button>
+                  <button
+                    className="btn btn-outline-secondary"
+                    onClick={handleClearFilter}
+                  >
+                    Clear Filter
+                  </button>
+                </div>
+              </div>
+
               {logLoading ? (
                 <div className="text-center py-4">
                   <Spinner size="lg" />

@@ -4,6 +4,7 @@ import {
   changeStatusController,
   getAllActiveUsersController,
   getAllDocsController,
+  getAllFilterLogsController,
   getAllInactiveUsersController,
   getAllLogsController,
   getAllUsersController,
@@ -50,5 +51,8 @@ router.post("/get-user-logs", requireSignIn, isAdmin, getUserLogController);
 
 //apply filter
 router.post("/filter-documents", requireSignIn, isAdmin, getFilterDocsController);
+
+//fetch all filter logs
+router.post("/get-filter-logs", requireSignIn, isAdmin, getAllFilterLogsController);
 
 export default router;

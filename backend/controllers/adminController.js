@@ -217,3 +217,44 @@ export const getAllDocsController = async (req, res) => {
     });
   }
 };
+
+
+export const getAllFilterLogsController = async (req, res) => {
+  try {
+    const { email, branch, department } = req.body;
+
+    // Step 1: Find the user by email
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Step 2: Find logs for that user, populate user and document info
+    const logs = await logsModel
+      .find({ user_id: user._id })
+      .populate("user_id")
+      .populate("document_id");
+
+    // Step 3: Filter logs based on document's branch and department
+    const filteredLogs = logs.filter(
+      (log) =>
+        log.document_id &&
+        log.document_id.branch === branch &&
+        log.document_id.department === department
+    );
+
+    res.status(200).send({
+      success: true,
+      logs: filteredLogs,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Error while fetching filtered logs",
+      error,
+    });
+  }
+};
