@@ -76,7 +76,7 @@ const Login = () => {
           }}
         >
           <h4 className="title">
-            <span style={{color:"red"}}>Login</span> to yout account!
+            <span style={{color:"red"}}>Login</span> to your account!
           </h4>
 
           <div className="mb-3 ">
