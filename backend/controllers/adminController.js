@@ -201,7 +201,7 @@ export const getFilterDocsController = async (req, res) => {
 
 export const getAllDocsController = async (req, res) => {
   try {
-    const documents = await docsModel.find({}).sort({ createdAt: -1 }); // Sorted by newest first
+    const documents = await docsModel.find({}).populate("user_id").sort({ createdAt: -1 }); // Sorted by newest first
 
     res.status(200).send({
       success: true,

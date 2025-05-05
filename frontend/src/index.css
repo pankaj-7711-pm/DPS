@@ -409,3 +409,13 @@ body{
   color: rgb(71, 71, 109);
   /* color: rgb(35, 161, 178); */
 }
+
+
+.login-page{
+  background: #833AB4;
+background: linear-gradient(90deg,rgba(131, 58, 180, 1) 0%, rgba(253, 29, 29, 1) 84%, rgba(252, 176, 69, 1) 100%);
+}
+
+.dfdf{
+  background-color: rgb(176, 182, 248);
+}

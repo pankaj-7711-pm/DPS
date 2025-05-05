@@ -238,7 +238,7 @@ const UserDashboard = () => {
   };
 
   return (
-    <div>
+    <div className="">
       <nav className="navbar navbar-light bg-light justify-content-between px-4">
         <div
           style={{
@@ -253,7 +253,7 @@ const UserDashboard = () => {
               display: "flex",
               justifyContent: "flex-start",
               // alignItems: "center",
-              flexDirection:"column"
+              flexDirection: "column",
             }}
           >
             <div>
@@ -263,7 +263,7 @@ const UserDashboard = () => {
               </span>
               , Welcome to Your Dashboard
             </div>
-            <p style={{margin:"0"}}>{user.user.email}</p>
+            <p style={{ margin: "0" }}>{user.user.email}</p>
           </div>
         </div>
         <button className="btn btn-outline-danger" onClick={handleLogout}>
@@ -273,6 +273,7 @@ const UserDashboard = () => {
 
       <div className="container mt-5 mb-5">
         <div
+          className="dfdf"
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -285,12 +286,13 @@ const UserDashboard = () => {
             className="aaa"
             style={{
               padding: "2rem 2rem 1rem 2rem",
-              borderRadius: "12px",
+              // borderRadius: "12px",
+              backgroundColor: "white",
             }}
           >
             <h3 className="mb-4">
-              <span style={{ color: "blue" }}>Upload</span> your{" "}
-              <span style={{ color: "blue" }}>Document</span>
+              <span style={{ color: "rgb(22, 40, 243)" }}>Upload</span> your{" "}
+              <span>Document</span>
             </h3>
 
             <div className="mb-3">
@@ -366,7 +368,10 @@ const UserDashboard = () => {
         </div>
         <hr />
 
-        <h5 className="mt-4 mb-3">Your Uploaded Documents</h5>
+        <h5 className="mt-4 mb-3">
+          Your <span style={{ color: "rgb(22, 40, 243)" }}>Uploaded</span>{" "}
+          Documents
+        </h5>
         <div className="row mb-3">
           <div className="col-md-4">
             <select
@@ -414,32 +419,57 @@ const UserDashboard = () => {
         {documents.length === 0 ? (
           <p>No documents uploaded yet.</p>
         ) : (
-          <ul className="list-group">
+          <div>
             <div style={{ margin: "0px 0 12px 0", textAlign: "center" }}>
               <span style={{ color: "blue" }}>{documents.length}</span>{" "}
               Documents
             </div>
-            {documents.map((doc) => (
-              <li
-                key={doc._id}
-                className="list-group-item d-flex justify-content-between align-items-center"
-              >
-                <div>
-                  <strong>{doc.file_name}</strong>
-                  <br />
-                  <small>
-                    {doc.branch} → {doc.department}
-                  </small>
-                </div>
-                <button
-                  className="btn btn-sm btn-outline-primary"
-                  onClick={() => navigate(`/document/${doc._id}`)}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              {documents.map((doc) => (
+                <div
+                  key={doc._id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    minWidth: "15rem",
+                    margin: "2rem",
+                    border: "1px solid rgb(218, 212, 212)",
+                    padding: "2rem 1rem",
+                    borderRadius: "10px",
+                  }}
                 >
-                  View
-                </button>
-              </li>
-            ))}
-          </ul>
+                  <div style={{ textAlign: "center" }}>
+                    <strong style={{ marginBottom: "1rem" }}>
+                      {doc.file_name}
+                    </strong>
+
+                    <br />
+                    <small style={{ marginTop: "2rem" }}>
+                      {doc.branch} → {doc.department}
+                    </small>
+                    <p style={{ marginTop: "1rem" }}>
+                      {new Date(doc.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                  <button
+                    className="btn btn-sm btn-outline-primary"
+                    onClick={() => navigate(`/document/${doc._id}`)}
+                  >
+                    View
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </div>

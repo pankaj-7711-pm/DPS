@@ -44,7 +44,7 @@ const departmentMap = {
     "Legal",
     "Protocol",
   ],
-  "Revenue": [
+  Revenue: [
     "Land Records",
     "City Survey",
     "District Inspector Land Records (DILR)",
@@ -56,7 +56,7 @@ const departmentMap = {
     "Land Acquisition",
   ],
   "Disaster- Management": ["Disaster Response", "Relief Coordination"],
-  "Election": [
+  Election: [
     "District Election Office",
     "Deputy District Election Officer",
     "Mamlatdar Election",
@@ -71,7 +71,7 @@ const departmentMap = {
     "Development Authorities (e.g., DUDA, AVKUDA)",
   ],
   "Geology & Mining": ["Geology & Mining Branch"],
-  "Education": ["Primary Education", "Secondary Education", "Higher Education"],
+  Education: ["Primary Education", "Secondary Education", "Higher Education"],
   "Health & Family Welfare": ["Health Department", "Family Welfare Schemes"],
   "Social Welfare": [
     "Social Justice & Empowerment",
@@ -123,18 +123,15 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     let url = "http://localhost:4000/api/v1/adminctrl/getAllUsers";
-    if (filter === "active")
-    {
+    if (filter === "active") {
       url = "http://localhost:4000/api/v1/adminctrl/getAllActiveUsers";
       // setCountData("Total Active Users");
     }
-      
-    if (filter === "inactive")
-    {
+
+    if (filter === "inactive") {
       url = "http://localhost:4000/api/v1/adminctrl/getAllInactiveUsers";
       // setCountData("Total Inactive Users");
     }
-      
 
     try {
       const response = await axios.get(url);
@@ -180,7 +177,7 @@ const AdminDashboard = () => {
   const handleClearFilter = () => {
     setSelectedBranch("");
     setSelectedDepartment("");
-    handleViewLogs(logUser,selectedUserEmail);
+    handleViewLogs(logUser, selectedUserEmail);
   };
 
   const fetchDocuments = async () => {
@@ -257,7 +254,7 @@ const AdminDashboard = () => {
       );
       if (response.data.success) {
         setUsers(response.data.user);
-        setCountData("Total Searched Users")
+        setCountData("Total Searched Users");
       } else {
         setUsers([]);
       }
@@ -341,25 +338,27 @@ const AdminDashboard = () => {
         </button>
       </nav>
       <div className="container mt-4">
-        <h1 className="mb-4">Keep track of Everything!</h1>
+        <h1 className="mb-4" style={{ fontWeight: "400" }}>
+          Keep track of <span style={{ color: "red" }}>Everything!</span>
+        </h1>
 
         <div className="mb-3 d-flex justify-content-between">
           <div>
             <button
               onClick={() => setFilter("all")}
-              className="btn btn-primary me-2"
+              className="btn btn btn-outline-primary me-2"
             >
               All Users
             </button>
             <button
               onClick={() => setFilter("active")}
-              className="btn btn-success me-2"
+              className="btn btn-outline-success me-2"
             >
               Active Users
             </button>
             <button
               onClick={() => setFilter("inactive")}
-              className="btn btn-danger"
+              className="btn btn-outline-danger"
             >
               Inactive Users
             </button>
@@ -386,7 +385,10 @@ const AdminDashboard = () => {
           {users.map((user, idx) => (
             <div key={idx} className="col-md-4">
               <div className="card p-3 d-flex flex-column h-100">
-                <h5>{user.email}</h5>
+                <h3 style={{ color: "blue", fontWeight: "400" }}>
+                  {user.name}
+                </h3>
+                <h5 style={{ fontWeight: "300" }}>{user.email}</h5>
                 <div className="d-flex justify-content-between align-items-center mt-auto">
                   <Switch
                     colorScheme="green"
@@ -408,7 +410,9 @@ const AdminDashboard = () => {
         </div>
 
         <div className="mt-5">
-          <h4>Filter Documents</h4>
+          <h4>
+            <span style={{ color: "red" }}>Filter</span> Documents
+          </h4>
           <div className="row g-3 align-items-end">
             <div className="col-md-4">
               <label className="form-label">Branch</label>
@@ -446,13 +450,13 @@ const AdminDashboard = () => {
           </div>
           <div className="mt-3">
             <button
-              className="btn btn-primary me-2"
+              className="btn btn-outline-primary me-2"
               onClick={handleApplyFilters}
             >
               Apply Filters
             </button>
             <button
-              className="btn btn-secondary"
+              className="btn btn-outline-secondary"
               onClick={() => {
                 setBranch("");
                 setDepartment("");
@@ -486,14 +490,33 @@ const AdminDashboard = () => {
                     <strong>Date:</strong>{" "}
                     {new Date(doc.createdAt).toLocaleDateString()}
                   </p>
-                  <a
-                    href={doc.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-primary mt-auto"
+                  <p>
+                    <strong>Uploaded by: </strong>
+                    {doc.user_id.name}
+                  </p>
+                  <div
+                    className="mt-auto"
+                    style={{ display: "flex", justifyContent: "space-between" }}
                   >
-                    View
-                  </a>
+                    <a
+                      href={doc.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-outline-primary"
+                      style={{ width: "40%" }}
+                    >
+                      View
+                    </a>
+                    <a
+                      href={doc.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-outline-primary"
+                      style={{ width: "40%" }}
+                    >
+                      Download
+                    </a>
+                  </div>
                 </div>
               </div>
             ))}
@@ -563,24 +586,37 @@ const AdminDashboard = () => {
                   <Spinner size="lg" />
                 </div>
               ) : logs.length > 0 ? (
-                logs.map((log) => (
-                  <div
-                    key={log._id}
-                    className="border rounded p-3 mb-3 bg-light"
-                  >
-                    <p>
-                      <strong>Action:</strong> {log.action}
-                    </p>
-                    <p>
-                      <strong>Document:</strong>{" "}
-                      {log.document_id?.file_name || "N/A"}
-                    </p>
-                    <p>
-                      <strong>Date:</strong>{" "}
-                      {new Date(log.createdAt).toLocaleString()}
-                    </p>
-                  </div>
-                ))
+                <>
+                  <p style={{ fontWeight: "400" }}>
+                    Total Logs: <span style={{color:"blue"}}>{logs.length}</span>
+                  </p>
+                  {logs.map((log) => (
+                    <div
+                      key={log._id}
+                      className="border rounded p-3 mb-3 bg-light"
+                    >
+                      <p>
+                        <strong>Action:</strong> {log.action}
+                      </p>
+                      <p>
+                        <strong>Document:</strong>{" "}
+                        {log.document_id?.file_name || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Date:</strong>{" "}
+                        {new Date(log.createdAt).toLocaleString()}
+                      </p>
+                      <div>
+                        <button className="btn btn-outline-primary me-2">
+                          View
+                        </button>
+                        <button className="btn btn-outline-primary me-2">
+                          Download
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </>
               ) : (
                 <p>No logs found.</p>
               )}

@@ -63,10 +63,7 @@ const Login = () => {
 
   return (
     <div>
-      <div
-        className="form-container"
-        style={{ height: "100vh" }}
-      >
+      <div className="form-container login-page" style={{ height: "100vh" }}>
         <form
           onSubmit={handleSubmit}
           style={{
@@ -74,10 +71,13 @@ const Login = () => {
             display: "flex",
             flexDirection: "column",
             border: "1px solid black",
-            width:"18rem"
+            width: "20rem",
+            padding: "4rem 2rem",
           }}
         >
-          <h4 className="title">Login</h4>
+          <h4 className="title">
+            <span style={{color:"red"}}>Login</span> to yout account!
+          </h4>
 
           <div className="mb-3 ">
             <TextField
