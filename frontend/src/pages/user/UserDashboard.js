@@ -360,9 +360,9 @@ const UserDashboard = () => {
                 flexDirection: "column",
               }}
             >
-              <h1>You have uploaded</h1>
+              <h1 style={{ fontWeight: "400" }}>You have uploaded</h1>
               <h1 style={{ color: "green" }}>{ln}</h1>
-              <h1>documents.</h1>
+              <h1 style={{ fontWeight: "400" }}>documents.</h1>
             </div>
           </div>
         </div>
