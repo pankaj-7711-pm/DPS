@@ -110,8 +110,10 @@ const AdminDashboard = () => {
   const [selectedBranch, setSelectedBranch] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [logUser, setLogUser] = useState();
+  const [selectedDate, setSelectedDate] = useState("");
 
   const [documents, setDocuments] = useState([]);
+  const [allDocuments, setAllDocuments] = useState([]);
   const [branch, setBranch] = useState("");
   const [department, setDepartment] = useState("");
   const [date, setDate] = useState("");
@@ -120,6 +122,39 @@ const AdminDashboard = () => {
   const { user, setUser } = ConState();
   const navigate = useNavigate();
   const toast = useToast();
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
+  const indexOfLastDocument = currentPage * itemsPerPage;
+  const indexOfFirstDocument = indexOfLastDocument - itemsPerPage;
+  const currentDocuments = documents.slice(
+    indexOfFirstDocument,
+    indexOfLastDocument
+  );
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const pageNumbers = [];
+  for (let i = 1; i <= Math.ceil(documents.length / itemsPerPage); i++) {
+    pageNumbers.push(i);
+  }
+
+  // Pagination states (use different names)
+  const [userPage, setUserPage] = useState(1);
+  const usersPerPage = 5;
+
+  const indexOfLastUser = userPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+
+  const totalUserPages = Math.ceil(users.length / usersPerPage);
+  const userPageNumbers = Array.from(
+    { length: totalUserPages },
+    (_, i) => i + 1
+  );
+
+  const paginateUsers = (pageNum) => setUserPage(pageNum);
 
   const fetchUsers = async () => {
     let url = "http://localhost:4000/api/v1/adminctrl/getAllUsers";
@@ -186,6 +221,7 @@ const AdminDashboard = () => {
         "http://localhost:4000/api/v1/adminctrl/get-all-documents"
       );
       setDocuments(response.data.documents || []);
+      setAllDocuments(response.data.documents || []);
     } catch (err) {
       console.error("Error fetching documents:", err);
       setDocuments([]);
@@ -233,6 +269,7 @@ const AdminDashboard = () => {
         { department, branch }
       );
       setDocuments(response.data.documents || []);
+      setAllDocuments(response.data.documents || []);
     } catch (err) {
       console.error("Error applying filters:", err);
       setDocuments([]);
@@ -288,6 +325,23 @@ const AdminDashboard = () => {
     } finally {
       setLogLoading(false);
     }
+  };
+
+  const applyDateFilter = () => {
+    if (!selectedDate) return;
+    console.log(selectedDate);
+
+    const filtered = allDocuments.filter((doc) => {
+      const docDate = new Date(doc.createdAt).toISOString().split("T")[0];
+      return docDate === selectedDate;
+    });
+
+    setDocuments(filtered);
+  };
+
+  const clearDateFilter = () => {
+    setSelectedDate("");
+    setDocuments(allDocuments); // restore original list
   };
 
   const handleLogout = () => {
@@ -381,32 +435,88 @@ const AdminDashboard = () => {
           </button>
         </div>
 
-        <div className="row g-3">
-          {users.map((user, idx) => (
-            <div key={idx} className="col-md-4">
-              <div className="card p-3 d-flex flex-column h-100">
-                <h3 style={{ color: "blue", fontWeight: "400" }}>
-                  {user.name}
-                </h3>
-                <h5 style={{ fontWeight: "300" }}>{user.email}</h5>
-                <div className="d-flex justify-content-between align-items-center mt-auto">
-                  <Switch
-                    colorScheme="green"
-                    isChecked={user.status === 1}
-                    onChange={() =>
-                      handleStatusChange(user.email, user.status === 1 ? 0 : 1)
-                    }
-                  />
+        <div className="table-responsive mt-4">
+          <table className="table table-striped table-bordered">
+            <thead className="table-primary">
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Logs</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentUsers.map((user, idx) => (
+                <tr key={idx}>
+                  <td>{user.name}</td>
+                  <td>{user.email}</td>
+                  <td>
+                    <Switch
+                      colorScheme="green"
+                      isChecked={user.status === 1}
+                      onChange={() =>
+                        handleStatusChange(
+                          user.email,
+                          user.status === 1 ? 0 : 1
+                        )
+                      }
+                    />
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => handleViewLogs(user._id, user.email)}
+                      className="btn btn-outline-secondary btn-sm"
+                    >
+                      View Logs
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination controls */}
+        <div className="d-flex justify-content-center mt-3">
+          <nav>
+            <ul className="pagination">
+              <li className={`page-item ${userPage === 1 ? "disabled" : ""}`}>
+                <button
+                  className="page-link"
+                  onClick={() => paginateUsers(userPage - 1)}
+                  disabled={userPage === 1}
+                >
+                  Previous
+                </button>
+              </li>
+              {userPageNumbers.map((num) => (
+                <li
+                  key={num}
+                  className={`page-item ${userPage === num ? "active" : ""}`}
+                >
                   <button
-                    onClick={() => handleViewLogs(user._id, user.email)}
-                    className="btn btn-outline-secondary btn-sm"
+                    className="page-link"
+                    onClick={() => paginateUsers(num)}
                   >
-                    View Logs
+                    {num}
                   </button>
-                </div>
-              </div>
-            </div>
-          ))}
+                </li>
+              ))}
+              <li
+                className={`page-item ${
+                  userPage === totalUserPages ? "disabled" : ""
+                }`}
+              >
+                <button
+                  className="page-link"
+                  onClick={() => paginateUsers(userPage + 1)}
+                  disabled={userPage === totalUserPages}
+                >
+                  Next
+                </button>
+              </li>
+            </ul>
+          </nav>
         </div>
 
         <div className="mt-5">
@@ -421,7 +531,7 @@ const AdminDashboard = () => {
                 value={branch}
                 onChange={(e) => {
                   setBranch(e.target.value);
-                  setDepartment("");
+                  setDepartment(""); // Reset department when branch changes
                 }}
               >
                 <option value="">Select Branch</option>
@@ -447,25 +557,55 @@ const AdminDashboard = () => {
                 ))}
               </select>
             </div>
+
+            <div className="col-md-4 d-flex gap-2">
+              <button
+                className="btn btn-outline-primary"
+                onClick={handleApplyFilters}
+              >
+                Apply Filters
+              </button>
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => {
+                  setBranch("");
+                  setDepartment("");
+                  setSelectedDate("");
+                  fetchDocuments();
+                }}
+              >
+                Clear Filters
+              </button>
+            </div>
           </div>
+
           <div className="mt-3">
-            <button
-              className="btn btn-outline-primary me-2"
-              onClick={handleApplyFilters}
-            >
-              Apply Filters
-            </button>
-            <button
-              className="btn btn-outline-secondary"
-              onClick={() => {
-                setBranch("");
-                setDepartment("");
-                setDate("");
-                fetchDocuments();
-              }}
-            >
-              Clear Filters
-            </button>
+            <div className="row g-3 align-items-end">
+              <div className="col-md-4">
+                <label className="form-label">Select Date</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="mt-3">
+              <button
+                className="btn btn-outline-primary me-2"
+                onClick={applyDateFilter}
+              >
+                Apply Filter by Date
+              </button>
+              <button
+                className="btn btn-outline-secondary"
+                onClick={clearDateFilter}
+              >
+                Clear Date Filter
+              </button>
+            </div>
           </div>
         </div>
 
@@ -474,7 +614,7 @@ const AdminDashboard = () => {
             <span style={{ color: "blue" }}>{documents.length}</span> Documents
           </h4>
           <div className="row g-4">
-            {documents.map((doc) => (
+            {currentDocuments.map((doc) => (
               <div key={doc._id} className="col-md-4">
                 <div className="card p-3 d-flex flex-column h-100">
                   <p>
@@ -520,6 +660,53 @@ const AdminDashboard = () => {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Pagination Controls */}
+          <div className="d-flex justify-content-center mt-4">
+            <nav aria-label="Page navigation example">
+              <ul className="pagination">
+                <li
+                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+                >
+                  <button
+                    className="page-link"
+                    onClick={() => paginate(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                </li>
+                {pageNumbers.map((number) => (
+                  <li
+                    key={number}
+                    className={`page-item ${
+                      currentPage === number ? "active" : ""
+                    }`}
+                  >
+                    <button
+                      className="page-link"
+                      onClick={() => paginate(number)}
+                    >
+                      {number}
+                    </button>
+                  </li>
+                ))}
+                <li
+                  className={`page-item ${
+                    currentPage === pageNumbers.length ? "disabled" : ""
+                  }`}
+                >
+                  <button
+                    className="page-link"
+                    onClick={() => paginate(currentPage + 1)}
+                    disabled={currentPage === pageNumbers.length}
+                  >
+                    Next
+                  </button>
+                </li>
+              </ul>
+            </nav>
           </div>
         </div>
 
@@ -588,7 +775,8 @@ const AdminDashboard = () => {
               ) : logs.length > 0 ? (
                 <>
                   <p style={{ fontWeight: "400" }}>
-                    Total Logs: <span style={{color:"blue"}}>{logs.length}</span>
+                    Total Logs:{" "}
+                    <span style={{ color: "blue" }}>{logs.length}</span>
                   </p>
                   {logs.map((log) => (
                     <div

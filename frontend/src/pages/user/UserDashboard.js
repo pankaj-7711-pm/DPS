@@ -16,7 +16,7 @@ const branchDeptOptions = {
     "Legal",
     "Protocol",
   ],
-  "Revenue": [
+  Revenue: [
     "Land Records",
     "City Survey",
     "District Inspector Land Records (DILR)",
@@ -28,7 +28,7 @@ const branchDeptOptions = {
     "Land Acquisition",
   ],
   "Disaster Management": ["Disaster Response", "Relief Coordination"],
-  "Election": [
+  Election: [
     "District Election Office",
     "Deputy District Election Officer",
     "Mamlatdar Election",
@@ -43,7 +43,7 @@ const branchDeptOptions = {
     "Development Authorities (e.g., DUDA, AVKUDA)",
   ],
   "Geology & Mining": ["Geology & Mining Branch"],
-  "Education": ["Primary Education", "Secondary Education", "Higher Education"],
+  Education: ["Primary Education", "Secondary Education", "Higher Education"],
   "Health & Family Welfare": ["Health Department", "Family Welfare Schemes"],
   "Social Welfare": [
     "Social Justice & Empowerment",
@@ -73,21 +73,43 @@ const branchDeptOptions = {
 
 const UserDashboard = () => {
   const { user, setUser } = ConState();
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [pdfUrl, setPdfUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [documents, setDocuments] = useState([]);
+  const [allDocuments, setAllDocuments] = useState([]);
   const [ln, setLn] = useState(0);
 
   const [branch, setBranch] = useState("");
   const [department, setDepartment] = useState("");
   const [filterBranch, setFilterBranch] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("");
+  const [filterDate, setFilterDate] = useState("");
 
   const toast = useToast();
   const navigate = useNavigate();
 
-  const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [documents]);
+
+  const totalPages = Math.ceil(documents.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentDocuments = documents.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
+  const goToPage = (pageNumber) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
+
+  // const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
 
   const postPDF = async (file) => {
     setIsLoading(true);
@@ -120,58 +142,94 @@ const UserDashboard = () => {
     }
   };
 
+  const applyDateFilter = () => {
+    if (!filterDate) return;
+    console.log(filterDate);
+
+    const filtered = allDocuments.filter((doc) => {
+      const docDate = new Date(doc.createdAt).toISOString().split("T")[0];
+      return docDate === filterDate;
+    });
+
+    setDocuments(filtered);
+  };
+
+  const clearDateFilter = () => {
+    setFilterDate("");
+    setDocuments(allDocuments); // restore original list
+  };
+
   const handleSubmit = async () => {
-    if (!selectedFile || !branch || !department) {
-      alert("Please fill all fields");
+    if (selectedFiles.length === 0 || !branch || !department) {
+      alert("Please fill all fields and select at least one PDF.");
       return;
     }
 
-    const uploadedUrl = await postPDF(selectedFile);
-    if (!uploadedUrl) return;
+    setIsLoading(true);
 
     try {
-      const res = await axios.post(
-        "http://localhost:4000/api/v1/userctrl/upload",
-        {
-          file_name: selectedFile.name,
-          file_path: uploadedUrl,
-          branch,
-          department,
-        }
-      );
+      for (const file of selectedFiles) {
+        // 1. Upload file (postPDF should accept a File object and return a URL)
+        const uploadedUrl = await postPDF(file);
 
-      if (res.data.success) {
-        toast({
-          title: res.data.message,
-          status: "success",
-          duration: 5000,
-          isClosable: true,
-          position: "top",
-        });
-        setSelectedFile(null);
-        setPdfUrl("");
-        setBranch("");
-        setDepartment("");
-        fetchDocuments();
-      } else {
-        toast({
-          title: res.data.message,
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          position: "top",
-        });
+        if (!uploadedUrl) {
+          toast({
+            title: `Upload failed for ${file.name}`,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+          continue;
+        }
+
+        // 2. Save metadata to backend
+        const res = await axios.post(
+          "http://localhost:4000/api/v1/userctrl/upload",
+          {
+            file_name: file.name,
+            file_path: uploadedUrl,
+            branch,
+            department,
+          }
+        );
+
+        if (res.data.success) {
+          toast({
+            title: `Uploaded: ${file.name}`,
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+        } else {
+          toast({
+            title: `Failed to save: ${file.name}`,
+            description: res.data.message,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+        }
       }
-    } catch (error) {
+
+      // Clear form and refresh
+      setSelectedFiles([]);
+      setBranch("");
+      setDepartment("");
+      setPdfUrl("");
+      fetchDocuments();
+    } catch (err) {
+      console.error(err);
       toast({
-        title: "Error uploading document",
+        title: "Error uploading documents",
         status: "error",
         duration: 5000,
         isClosable: true,
-        position: "top",
       });
     }
+
+    setIsLoading(false);
   };
+
 
   const fetchDocuments = async () => {
     try {
@@ -180,7 +238,8 @@ const UserDashboard = () => {
       );
       if (res.data.success) {
         setDocuments(res.data.documents || []);
-        setLn(res.data.documents.length)
+        setAllDocuments(res.data.documents || []);
+        setLn(res.data.documents.length);
       }
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -202,6 +261,7 @@ const UserDashboard = () => {
       );
       if (res.data.success) {
         setDocuments(res.data.documents || []);
+        setAllDocuments(res.data.documents || []);
       }
     } catch (error) {
       toast({
@@ -335,11 +395,38 @@ const UserDashboard = () => {
             <div className="mb-3">
               <label className="form-label">Upload PDF</label>
               <input
-                className="form-control"
                 type="file"
                 accept="application/pdf"
-                onChange={handleFileChange}
+                multiple
+                className="form-control"
+                onChange={(e) => {
+                  const filesArray = Array.from(e.target.files);
+                  setSelectedFiles(filesArray);
+                }}
               />
+              {selectedFiles.length > 0 && (
+                <ul className="mb-3 list-group">
+                  {selectedFiles.map((file, idx) => (
+                    <li
+                      key={idx}
+                      className="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <span style={{ width: "15rem" }}>{file.name}</span>
+                      <button
+                        className="btn btn-sm btn-outline-danger ms-1"
+                        onClick={() => {
+                          const updatedFiles = selectedFiles.filter(
+                            (_, i) => i !== idx
+                          );
+                          setSelectedFiles(updatedFiles);
+                        }}
+                      >
+                        ❌
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <button
@@ -390,6 +477,7 @@ const UserDashboard = () => {
               ))}
             </select>
           </div>
+
           <div className="col-md-4">
             <select
               className="form-select"
@@ -406,12 +494,43 @@ const UserDashboard = () => {
                 ))}
             </select>
           </div>
+
           <div className="col-md-4 d-flex gap-2">
             <button className="btn btn-outline-primary" onClick={applyFilter}>
               Apply Filter
             </button>
             <button className="btn btn-outline-secondary" onClick={clearFilter}>
               Clear Filter
+            </button>
+          </div>
+        </div>
+
+        {/* Date Filter Section */}
+        <div className="row mb-3">
+          <div className="col-md-4">
+            <input
+              type="date"
+              className="form-control"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+            />
+          </div>
+
+          <div className="col-md-4 d-flex gap-2">
+            <button
+              className="btn btn-outline-primary"
+              onClick={applyDateFilter}
+            >
+              Apply Date Filter
+            </button>
+            <button
+              className="btn btn-outline-secondary"
+              onClick={() => {
+                clearDateFilter();
+                setFilterDate("");
+              }}
+            >
+              Clear Date Filter
             </button>
           </div>
         </div>
@@ -424,6 +543,7 @@ const UserDashboard = () => {
               <span style={{ color: "blue" }}>{documents.length}</span>{" "}
               Documents
             </div>
+
             <div
               style={{
                 display: "flex",
@@ -432,7 +552,7 @@ const UserDashboard = () => {
                 flexWrap: "wrap",
               }}
             >
-              {documents.map((doc) => (
+              {currentDocuments.map((doc) => (
                 <div
                   key={doc._id}
                   style={{
@@ -440,24 +560,49 @@ const UserDashboard = () => {
                     justifyContent: "center",
                     flexDirection: "column",
                     alignItems: "center",
-                    minWidth: "15rem",
+                    // Width: "15rem",
+                    minHeight: "20rem",
                     margin: "2rem",
                     border: "1px solid rgb(218, 212, 212)",
                     padding: "2rem 1rem",
                     borderRadius: "10px",
                   }}
                 >
-                  <div style={{ textAlign: "center" }}>
-                    <strong style={{ marginBottom: "1rem" }}>
-                      {doc.file_name}
-                    </strong>
+                  <div
+                    style={{
+                      textAlign: "center",
+                      width: "15rem",
+                      display: "flex",
+                      justifyContent: "center",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <strong style={{ width: "15rem" }}>{doc.file_name}</strong>
 
                     <br />
-                    <small style={{ marginTop: "2rem" }}>
+                    <hr
+                      style={{
+                        backgroundColor: "green",
+                        height: "6px",
+                        borderRadius: "12px",
+                        width: "80%",
+                      }}
+                    />
+                    <small>
                       {doc.branch} → {doc.department}
                     </small>
                     <p style={{ marginTop: "1rem" }}>
-                      {new Date(doc.createdAt).toLocaleString()}
+                      {new Date(doc.createdAt).toLocaleString("en-IN", {
+                        weekday: "long", // "short", "long", etc.
+                        year: "numeric",
+                        month: "long", // "numeric", "2-digit", etc.
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "numeric",
+                        second: "numeric",
+                        hour12: true, // 12-hour format, set to false for 24-hour format
+                      })}
                     </p>
                   </div>
                   <button
@@ -468,6 +613,38 @@ const UserDashboard = () => {
                   </button>
                 </div>
               ))}
+            </div>
+
+            <div style={{ textAlign: "center", marginTop: "1rem" }}>
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="btn btn-sm btn-secondary"
+              >
+                Prev
+              </button>
+
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i + 1}
+                  onClick={() => goToPage(i + 1)}
+                  className={`btn btn-sm mx-1 ${
+                    currentPage === i + 1
+                      ? "btn-primary"
+                      : "btn-outline-primary"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="btn btn-sm btn-secondary"
+              >
+                Next
+              </button>
             </div>
           </div>
         )}
